@@ -2,6 +2,7 @@ import subprocess
 import codecs
 import optparse
 
+# Function to create a CLI
 def get_options():
     parser = optparse.OptionParser()
     parser.add_option("-a", "--any", dest = "option_a", help = "Option A")
@@ -15,6 +16,8 @@ def get_options():
     elif not options.option_c:
         parser.error("[-] Option C is required, use --help for more information")
     return options
+
+# ----------------------------------------------------------------
 
 # Read many arguments from a function
 #def exec_command(*arguments):
@@ -36,7 +39,6 @@ def get_options():
 def convert2uf8(string):
     string = codecs.decode(string, 'UTF-8')
     return string
-
 
 # ----------------------------------------------------------------
 
@@ -68,8 +70,15 @@ def pipeline(*arguments):
     for i in arguments[1:]:
         result = subprocess.Popen(i, stdin=result.stdout, stdout=subprocess.PIPE)
     result = result.stdout.read()
-    result = convert2uf8(result)
+    #result = convert2uf8(result)
     return result
+
+cmd1= ["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"]
+cmd2 = ["grep", "admin"]
+cmd3 = ["grep", "ima"]
+cmd4 = ["grep", "qa"]
+result = pipeline(cmd1, cmd2)
+print (result)
 
 # ----------------------------------------------------------------
 
