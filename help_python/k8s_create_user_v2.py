@@ -27,13 +27,10 @@ def get_options():
     return options
 
 def create_keys(username,role,user_keys,kubernetes_keys):
-  print("")
   # Construct role binding
   role_binding = username + "-" + role
   # Searching for existing role binding
-  cmd1 = ["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"]
-  cmd2 = ["grep", role_binding]
-  get_user_rol = concatenate_commands(cmd1,cmd2)
+  get_user_rol = concatenate_commands(["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"],["grep", role_binding])
   # Construct the path where the user keys will be stored
   user_key_path = user_keys + "/" + username 
   if not exists(kubernetes_keys):
@@ -43,9 +40,8 @@ def create_keys(username,role,user_keys,kubernetes_keys):
   elif get_user_rol:
     # Showing the rolebindings found
     print("[ " + '\U0001F6A7' + "  ] Kubernetes user " + '"' + username + '"' + " already exists in at least one namespace.")
-    print("       Rolebindngs found (namespace/rolebinding/role/time created):" )
-    print("") 
-    print("       " + str(get_user_rol))
+    print("        Rolebindngs found (namespace/rolebinding/role/time created):" )
+    print(bcolors.WARNING + "        " + get_user_rol + bcolors.ENDC)
     if exists(user_keys):
       print("[ " + '\U0001F565' + "  ] Analizing --user-keypath provided (" + user_keys + ")")
       print("[ " + '\U0001F4C1' + "  ] Directory " + user_keys + " already exists.")
@@ -89,16 +85,12 @@ def create_keys(username,role,user_keys,kubernetes_keys):
     print("[ " + '\U0001F510' + "  ] Creating public/private keys for user " + username + " into " + user_key_path)
     print("[ " + '\U0001F5DD' + "   ] Creating key: " + user_key)
     # Createing the kyes signed by kubernetes
-    cmd1 = ["openssl", "genrsa", "-out", user_key, "2048"]
-    cmd2 = ["openssl", "req", "-new", "-key", user_key, "-out", user_csr, "-subj", "/CN="+ username + "/O=grupo"]
-    cmd3 = ["openssl", "x509", "-req", "-in", user_csr, "-CA", kubernetes_crt, "-CAkey", kubernetes_key, "-CAcreateserial", "-out", user_crt, "-days", "3650"]
-    cmd4 = ["kubectl", "config", "set-credentials", username, "--client-certificate=" + user_crt, "--client-key=" + user_key ]
-    execute_command(cmd1)
+    execute_command(["openssl", "genrsa", "-out", user_key, "2048"])
     print("[ " + '\U0001F5DD' + "  ] Creating request: " + user_csr)
-    execute_command(cmd2)
+    execute_command(["openssl", "req", "-new", "-key", user_key, "-out", user_csr, "-subj", "/CN="+ username + "/O=grupo"])
     print("[ " + '\U0001F5DD' + "  ] Creating private key: " + user_crt)
-    execute_command(cmd3)
-    execute_command(cmd4)
+    execute_command(["openssl", "x509", "-req", "-in", user_csr, "-CA", kubernetes_crt, "-CAkey", kubernetes_key, "-CAcreateserial", "-out", user_crt, "-days", "3650"])
+    execute_command(["kubectl", "config", "set-credentials", username, "--client-certificate=" + user_crt, "--client-key=" + user_key ])
 
 def create_kubernetes_manifest(username,namespace,role):
     manifest = '''\
@@ -166,65 +158,43 @@ roleRef:
 def apply_kubernetes_manifest(manifest,username,namespace,role):
   print("[ " + '\U0001F565' + "  ] Verifying if rolebinding already exists in namespace:", '"' + namespace + '"')
   role_binding = username + "-" + role
-  get_rolebindings = subprocess.Popen(["kubectl", "-n", namespace, "get", "rolebindings.rbac.authorization.k8s.io"], stdout=subprocess.PIPE)
-  get_user_rol = subprocess.Popen(["grep", role_binding], stdin=get_rolebindings.stdout, stdout=subprocess.PIPE)
-  get_user_rol = get_user_rol.stdout.read()
+  get_user_rol = concatenate_commands(["kubectl", "-n", namespace, "get", "rolebindings.rbac.authorization.k8s.io"],["grep", role_binding])
   if get_user_rol:
+    # Showing the role binding founded
     print("[ " + '\U0001F6A7' + "  ] Rolebindngs found in namespace:", '"' + namespace + '", no new roles will be deployed...')
-    print ("")
-    describe_rolebing = subprocess.check_output(["kubectl", "-n", namespace, "describe", "rolebindings.rbac.authorization.k8s.io", role_binding])
-    describe_rolebing = describe_rolebing.replace(b'\n',b'\n       ')
-    describe_rolebing = codecs.decode(describe_rolebing, 'UTF-8')
-    print("       " + str(describe_rolebing))  
+    describe_rolebing = execute_command(["kubectl", "-n", namespace, "describe", "rolebindings.rbac.authorization.k8s.io", role_binding])
+    describe_rolebing = describe_rolebing.replace('\n','\n        ')
+    print(bcolors.WARNING + "        " + describe_rolebing + bcolors.ENDC)
   else:
-    print("[ " + '\U0001F6A8' + "  ] Rolebinding doesn't exists in namespace: ", '"' + namespace + '"' + " creating...")
+    print("[ " + '\U0001F6A8' + "  ] Rolebinding doesn't exists in namespace: ", '"' + namespace + '"' + ", creating it...")
     with open('/tmp/role.yml', 'w') as file:
         file.write(manifest)
-    cmd1 = ["kubectl", "apply", "-f", "/tmp/role.yml"]
-    execute_command(cmd1) 
+    execute_command(["kubectl", "apply", "-f", "/tmp/role.yml"]) 
 
 def encode_keys(username,user_keys,kubernetes_keys):
     # Encode content of kubernetes_crt_file in base64 into "certificate_authority_data" var
     kubernetes_crt_file = kubernetes_keys + "/ca.crt"
     if exists(kubernetes_crt_file):
-      kubernetes_crt = subprocess.check_output(["cat", kubernetes_crt_file], text=True)
-      kubernetes_crt_bytes = kubernetes_crt.encode("ascii")
-      certificate_authority_data_bytes = base64.b64encode(kubernetes_crt_bytes)
-      certificate_authority_data = certificate_authority_data_bytes.decode("ascii")
+      certificate_authority_data = file2base64(kubernetes_crt_file)
     else:
-      print("[ " + '\U0001F6A8' + "  ] uberentes keys not found. Are you sure set the correct --keys, Please try again.")
+      print("[ " + '\U0001F6A8' + "  ] kuberentes keys not found. Are you sure set the correct --keys, Please try again.")
       sys.exit()
     # Encode content of user_crt_file in base64 into "client_certificate_data" var
     user_crt_file = user_keys + "/" + username + "/" + username + ".crt"
     if exists(user_crt_file):
-      user_crt = subprocess.check_output(["cat", user_crt_file], text=True)
-      user_crt_bytes = user_crt.encode("ascii")
+      client_certificate_data = file2base64(user_crt_file)
     else:
       print("[ " + '\U0001F6A8' + "  ] Preview User keys not found. Are you sure set the correct --user-keypath, Please try again.")
       sys.exit()
-    client_certificate_data_bytes = base64.b64encode(user_crt_bytes)
-    client_certificate_data = client_certificate_data_bytes.decode("ascii")
     # Encode content of user_key_file in base64 into "client_key_data" var
     user_key_file = user_keys + "/" + username + "/" + username + ".key"
-    user_key = subprocess.check_output(["cat", user_key_file], text=True)
-    user_key_bytes = user_key.encode("ascii")
-    client_key_data_bytes = base64.b64encode(user_key_bytes)
-    client_key_data = client_key_data_bytes.decode("ascii")
+    client_key_data = file2base64(user_key_file)
     return certificate_authority_data, client_certificate_data, client_key_data
 
 def create_kubeconfig(certificate_authority_data,client_certificate_data,client_key_data,username,namespace,user_keys):
-    # kubectl command add blank line to the end, we need to remove that line (\n)
-    context_name = subprocess.check_output(["kubectl", "config", "current-context"])
-    context_name = context_name.replace(b'\n',b'')
-    context_name = codecs.decode(context_name, 'UTF-8')
-
-    cluster_name = subprocess.check_output(["kubectl", "config", "view", "-o", 'jsonpath={.contexts[?(@.name==\"'+ context_name + '\")].context.cluster}'])
-    cluster_name = cluster_name.replace(b'\n',b'')
-    cluster_name = codecs.decode(cluster_name, 'UTF-8')
-
-    server_name = subprocess.check_output(["kubectl", "config", "view", "-o", 'jsonpath={.clusters[?(@.name==\"'+ cluster_name + '\")].cluster.server}'])
-    server_name = server_name.replace(b'\n',b'')
-    server_name = codecs.decode(server_name, 'UTF-8')
+    context_name = execute_command(["kubectl", "config", "current-context"])
+    cluster_name = execute_command(["kubectl", "config", "view", "-o", 'jsonpath={.contexts[?(@.name==\"'+ context_name + '\")].context.cluster}'])
+    server_name = execute_command(["kubectl", "config", "view", "-o", 'jsonpath={.clusters[?(@.name==\"'+ cluster_name + '\")].cluster.server}'])
 
     kubeconfig_content='''\
 apiVersion: v1
@@ -261,7 +231,7 @@ contexts:
     kubeconfig_file = user_keys + "/" + username + "/" "kubeconfig-" + username
     with open(kubeconfig_file, 'w') as file:
         file.write(kubeconfig_content)
-        print("[ " + '\U0001F6E0' + "  ] Kubeconfig created in: " + kubeconfig_file)
+        print("[ " + '\U0001F6E0' + "  ] Congratulations!!! Kubeconfig created as: " + kubeconfig_file)
 
 # Steps:
 

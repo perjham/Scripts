@@ -1,6 +1,24 @@
+from asyncio.subprocess import DEVNULL
 import subprocess
 import codecs
 import optparse
+import re
+import base64
+
+# ----------------------------------------------------------------
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+# ----------------------------------------------------------------
 
 # Function to create a CLI
 def get_options():
@@ -42,27 +60,25 @@ def convert2uf8(string):
 
 # ----------------------------------------------------------------
 
-# Function to print any command on linux, just pass the entire command as a string
+# Function to eexecute any command on linux, just pass the entire command as a string
 # Example usage: 
-#   cmd1= ["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"]
-#   result_cmd1 = stdout_command(cmd1)
-#   print (result_cmd1)
-
-def stdout_command(command):
-    result = subprocess.Popen(command,stdout=subprocess.PIPE)
-    result = result.stdout.read()
-    result = convert2uf8(result)
-    return result
-
-# ----------------------------------------------------------------
-
-# Function to execute any command on linux, just pass the entire command as a string
-# Example usage: 
-#   cmd1= ["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"]
-#   result_cmd1 = execute_command(cmd1)
+#   cmd1 = ["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"]
+#   cmd2 = ["free", "-m"]
+#   cmd3 = ["kubectl", "config", "view", "-o", 'jsonpath={.contexts[?(@.name==\"'+ "kubernetes-admin@kubernetes" + '\")].context.cluster}']
+#   r1 = execute_command (cmd1)
+#   print (r1)
+#   r2 = execute_command (cmd2)
+#   print (r2)
+#   r3 = execute_command (cmd3)
+#   print (r3)
 
 def execute_command(command):
-    subprocess.call(command)
+    result = subprocess.check_output(command)
+    result = convert2uf8(result)
+    # Remove the las line blank if exists
+    # https://stackoverflow.com/questions/1140958/whats-a-quick-one-liner-to-remove-empty-lines-from-a-python-string#:~:text=one%20would%20be%3A-,%27%5Cn%5E%24%27,-%E2%80%93%C2%A0
+    result = re.sub(r'\n^$', '', result, flags=re.MULTILINE)
+    return result
 
 # ----------------------------------------------------------------
 
@@ -81,9 +97,13 @@ def concatenate_commands(*arguments):
         result = subprocess.Popen(i, stdin=result.stdout, stdout=subprocess.PIPE)
     result = result.stdout.read()
     result = convert2uf8(result)
+    # Remove the last blank line generate for the function
+    result = re.sub(r'\n^$', '', result, flags=re.MULTILINE)
     return result
 
 # ----------------------------------------------------------------
 
-
+def file2base64(filename):
+    with open(filename, 'rb') as f:
+        return base64.b64encode(f.read()).decode('utf-8')
 
