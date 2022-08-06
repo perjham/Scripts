@@ -2,11 +2,8 @@
 from genericpath import exists
 import subprocess
 import optparse
-import re
 import os
 import sys
-import base64
-import codecs
 
 from functions import *
 
