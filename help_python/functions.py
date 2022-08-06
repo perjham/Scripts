@@ -103,6 +103,8 @@ def concatenate_commands(*arguments):
 
 # ----------------------------------------------------------------
 
+# Function to codify a filename in base64 format
+
 def file2base64(filename):
     with open(filename, 'rb') as f:
         return base64.b64encode(f.read()).decode('utf-8')
