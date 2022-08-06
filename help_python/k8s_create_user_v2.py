@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from genericpath import exists
-import subprocess
-import optparse
+#import optparse
 import os
 import sys
 
@@ -70,7 +69,7 @@ def create_keys(username,role,user_keys,kubernetes_keys):
       print("[ " + '\U0001F4C2' + "  ] Creating " + user_keys + "...")
       os.mkdir(str(user_keys))    
     print("[ " + '\U0001F4C2' + "  ] Cleaning" + user_key_path + "...")
-    subprocess.call(["rm", "-rf", user_key_path + "/", "*"])
+    execute_command(["rm", "-rf", user_key_path + "/", "*"])
     print("[ " + '\U0001F6A7' + "  ] Creating " + user_key_path + "...")
     # Creating the folder containing user keys
     os.mkdir(str(user_key_path))
@@ -234,12 +233,6 @@ contexts:
 
 options = get_options()
 create_keys(options.username,options.role,options.user_keys,options.kubernetes_keys)
-
-role_binding = options.username + "-" + options.role
-get_rolebindings = subprocess.Popen(["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"], stdout=subprocess.PIPE)
-get_user_rol = subprocess.Popen(["grep", role_binding], stdin=get_rolebindings.stdout, stdout=subprocess.PIPE)
-get_user_rol = get_user_rol.stdout.read()
-user_key_path = options.user_keys + "/" + options.username
 manifest = create_kubernetes_manifest(options.username,options.namespace,options.role)
 apply_kubernetes_manifest(manifest,options.username,options.namespace,options.role)
 certificate_authority_data, client_certificate_data, client_key_data = encode_keys(options.username,options.user_keys,options.kubernetes_keys)

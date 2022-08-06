@@ -75,7 +75,7 @@ def convert2uf8(string):
 def execute_command(command):
     result = subprocess.check_output(command)
     result = convert2uf8(result)
-    # Remove the las line blank if exists
+    # Remove the last line blank if exists
     # https://stackoverflow.com/questions/1140958/whats-a-quick-one-liner-to-remove-empty-lines-from-a-python-string#:~:text=one%20would%20be%3A-,%27%5Cn%5E%24%27,-%E2%80%93%C2%A0
     result = re.sub(r'\n^$', '', result, flags=re.MULTILINE)
     return result
