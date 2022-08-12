@@ -144,7 +144,7 @@ class CreateKubernetesAccess():
     def create_rb_manifest(self):
         templateLoader = jinja2.FileSystemLoader(searchpath="templates")
         env = jinja2.Environment(loader=templateLoader)
-        template = env.get_template("rolebinding.yml")
+        template = env.get_template("rolebinding.jinja2")
         app = Flask(__name__)
         with app.app_context():
             self.manifest = render_template(template, role=self.role, namespace=self.namespace, username=self.username)
@@ -194,7 +194,7 @@ class CreateKubernetesAccess():
         server_name = ExecuteCommand(["kubectl", "config", "view", "-o", 'jsonpath={.clusters[?(@.name==\"'+ cluster_name + '\")].cluster.server}']).stdout()
         templateLoader = jinja2.FileSystemLoader(searchpath="templates")
         env = jinja2.Environment(loader=templateLoader)
-        kubeconfig = env.get_template("kubeconfig")
+        kubeconfig = env.get_template("kubeconfig.jinja2")
         app = Flask(__name__)
         with app.app_context():
             self.create_kubeconfig = render_template(kubeconfig, namespace=self.namespace, username=self.username, certificate_authority_data=self.certificate_authority_data, server_name=server_name, cluster_name=cluster_name, client_certificate_data=self.client_certificate_data, client_key_data=self.client_key_data )
@@ -203,7 +203,6 @@ class CreateKubernetesAccess():
             print(self.create_kubeconfig, file=file)
         #kubeconfig = self.user_keypath + "/" "kubeconfig-" + self.username
         print("[ " + '\U0001F6E0' + "  ] Congratulations!!! Kubeconfig created as: " + kubeconfig)
-            
 
 # Steps
 
