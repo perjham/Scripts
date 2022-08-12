@@ -2,7 +2,6 @@
 
 import subprocess
 import codecs
-#import optparse
 import re
 import argparse
 import base64
@@ -11,7 +10,6 @@ import os
 from genericpath import exists
 import jinja2
 from flask import render_template, Flask
-#from ..functions import file2base64
 
 class bcolors:
     HEADER = '\033[95m'
