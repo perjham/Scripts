@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3.8
 from genericpath import exists
 #import optparse
 import os
@@ -27,6 +27,7 @@ def create_keys(username,role,user_keys,kubernetes_keys):
   role_binding = username + "-" + role
   # Searching for existing role binding
   get_user_rol = concatenate_commands(["kubectl", "get", "rolebindings.rbac.authorization.k8s.io", "--all-namespaces"],["grep", role_binding])
+  get_user_rol = get_user_rol.replace('\n','\n        ')
   # Construct the path where the user keys will be stored
   user_key_path = user_keys + "/" + username 
   if not exists(kubernetes_keys):
@@ -44,9 +45,9 @@ def create_keys(username,role,user_keys,kubernetes_keys):
       if exists(user_key_path):
         print("[ " + '\U0001F4C1' + "  ] Directory " + user_key_path + " already exists.")
         user_key = user_key_path + "/" + username + ".key"
-        user_key = user_key_path + "/" + username + ".csr"
+        user_csr = user_key_path + "/" + username + ".csr"
         user_crt = user_key_path + "/" + username + ".crt"
-        if not exists(user_key) or not exists(user_key) or not exists(user_crt):
+        if not exists(user_key) or not exists(user_csr) or not exists(user_crt):
           print("[ " + '\U0001F6A8' + "  ] Keys for user " + '"' + username + '"' + " not found in " + user_key_path)
           print("       Set the correct --user-keypath with the user's keys.")
           print("       Remember, you must use the keys pair of created user.")
