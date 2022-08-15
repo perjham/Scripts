@@ -73,6 +73,7 @@ class Arguments:
         # Construct the kubernetes certificate authority
         self.kubernetes_crt = self.kubernetes_keypath + "/ca.crt"
         self.kubernetes_key = self.kubernetes_keypath + "/ca.key"
+        self.kubeconfig_file = self.user_keypath + "/" "kubeconfig-" + self.username
 
 class Keys(Arguments):
 
@@ -181,6 +182,7 @@ class RoleBinding(Arguments):
             ExecuteCommand(["kubectl", "apply", "-f", "/tmp/rb.yml"])
     
 class Kubeconfig(Arguments):
+
     def create(self):
         context_name = ExecuteCommand(["kubectl", "config", "current-context"]).stdout()
         cluster_name = ExecuteCommand(["kubectl", "config", "view", "-o", 'jsonpath={.contexts[?(@.name==\"'+ context_name + '\")].context.cluster}']).stdout()
@@ -192,14 +194,19 @@ class Kubeconfig(Arguments):
         kubeconfig = env.get_template("kubeconfig.jinja2")
         app = Flask(__name__)
         with app.app_context():
-           kubeconfig_content = render_template(kubeconfig, namespace=self.namespace, username=self.username, certificate_authority_data=certificate_authority_data, server_name=server_name, cluster_name=cluster_name, client_certificate_data=client_certificate_data, client_key_data=client_key_data )
-        kubeconfig_file = self.user_keypath + "/" "kubeconfig-" + self.username
-        with open(kubeconfig_file, 'w') as file:
+            kubeconfig_content = render_template(kubeconfig, namespace=self.namespace, username=self.username, certificate_authority_data=certificate_authority_data, server_name=server_name, cluster_name=cluster_name, client_certificate_data=client_certificate_data, client_key_data=client_key_data )
+        with open(self.kubeconfig_file, 'w') as file:
             print(kubeconfig_content, file=file)
-        print("[ " + '\U0001F6E0' + "  ] Congratulations!!! Kubeconfig created as: " + kubeconfig_file)
+        print("[ " + '\U0001F6E0' + "  ] Congratulations!!! Kubeconfig created as: " + self.kubeconfig_file)
+
+    def verify(self):
+        output = ExecuteCommand(["kubectl", "--kubeconfig", self.kubeconfig_file, "get", "deployment"]).stdout().replace('\n','\n       ')
+        print("[ " + '\U0001F6E0' + "  ] Verifying kubeconfig access: ")
+        print(bcolors.WARNING + "        " + output + bcolors.ENDC)
 
 # Steps
 Keys().create()
 manifest = RoleBinding().create()
 RoleBinding().apply(manifest)
 Kubeconfig().create()
+Kubeconfig().verify()
