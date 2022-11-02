@@ -12,7 +12,7 @@ DATA=("/etc" "/root/Scripts" "/var/spool/cron" "/opt")
 SERVICIOS=("docker") # Servicios necesarios que esten apagados para la integridad del respaldo 
 DATE=`date +%d%m%y-%H%M%S`
 MAX_DAY_BACKUP=25
-MYSQL_PASSWORD='WLUEN23Fbmu4wgZg9epMMNNv9MgSPdWq'
+MYSQL_PASSWORD='mystrongestmysqlpass'
 
 # --
 # Apagamos los servicios indicados
@@ -134,7 +134,7 @@ mkdir $RUTA_DE_BACKUP_ACTUAL/dumps_mysql
 #    mysqldump -u root -p$MYSQL_PASSWORD $DB --skip-lock-tables > $RUTA_DE_BACKUP_ACTUAL/dumps_mysql/$DB.sql;
 #    sleep 10
 #done
-mysqldump -p$MYSQL_PASSWORD -uadmin -hwordpress.cm6kgjqdsbqj.us-east-2.rds.amazonaws.com wordpress > $RUTA_DE_BACKUP_ACTUAL/dumps_mysql/wordpress.sql
+mysqldump -p$MYSQL_PASSWORD -uadmin -hmysqlhost wordpress > $RUTA_DE_BACKUP_ACTUAL/dumps_mysql/wordpress.sql
 
 # --
 # Exportamos las BD Posgresql
