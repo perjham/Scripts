@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prueba
+  namespace: prueba
+spec:
+  containers:
+  - name: prueba
+    image: redis
+    env:
+      - name: DB_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: credenciales-bd 
+            key: username
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: credenciales-bd
+            key: password
+  restartPolicy: Never
