@@ -1,2 +1,2 @@
 # scripts
-Scripts for multiple purposes
+Multiple purposes Scripts.
