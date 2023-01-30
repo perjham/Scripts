@@ -9,7 +9,7 @@ rules:
   verbs: ["*"]{% else %}
 rules:
 - apiGroups: ["*"]
-  resources: ["secrets","namespaces","pods","pods/log","configmaps","services","events","namespaces","nodes","horizontalpodautoscalers","ingresses","servicemonitors","replicasets","deployments"]
+  resources: ["namespaces","pods","pods/log","services","events","namespaces","nodes","horizontalpodautoscalers","ingresses","servicemonitors","replicasets","deployments"]
   verbs: ["get", "watch", "list"]{% endif %}
 ---
 kind: RoleBinding
