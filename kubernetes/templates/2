@@ -1,0 +1,3 @@
+srvdevk8smaster01.oefa.gob.pe   Ready    control-plane,master   359d   v1.21.14
+srvdevk8sworker01.oefa.gob.pe   Ready    <none>                 359d   v1.21.14
+srvdevk8sworker02.oefa.gob.pe   Ready    <none>                 359d   v1.21.14
