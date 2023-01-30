@@ -1,2 +1,0 @@
-# scripts
-Multiple purposes Scripts
