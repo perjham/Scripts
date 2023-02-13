@@ -1,5 +1,5 @@
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ role }}
   namespace: {{ namespace }}{% if role == "admin" %}
@@ -13,7 +13,7 @@ rules:
   verbs: ["get", "watch", "list"]{% endif %}
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ username }}-{{ role }}
   namespace: {{ namespace }}
