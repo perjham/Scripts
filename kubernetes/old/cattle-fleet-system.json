@@ -1,0 +1,68 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "annotations": {
+            "cattle.io/status": "{\"Conditions\":[{\"Type\":\"ResourceQuotaInit\",\"Status\":\"True\",\"Message\":\"\",\"LastUpdateTime\":\"2023-03-10T17:27:22Z\"},{\"Type\":\"InitialRolesPopulated\",\"Status\":\"True\",\"Message\":\"\",\"LastUpdateTime\":\"2023-03-10T17:27:28Z\"}]}",
+            "field.cattle.io/projectId": "c-m-kc5g5fm9:p-cckqc",
+            "lifecycle.cattle.io/create.namespace-auth": "true",
+            "management.cattle.io/no-default-sa-token": "true",
+            "objectset.rio.cattle.io/applied": "H4sIAAAAAAAA/3zNMU7EMBCF4bu8OgmbGHaTHIKSfuyMWYPtiTIjJLTK3ZG1PeUr3vc/QHv64EOTVKz4GdHhO9UNK96psO4UGB0KG21khPUBqlWMLEnVNsV/cTBlG44kQyCzzEOSl9SMmJmtp0+u1nsRUztox9khk+f87/9Oem+CW5bt4t14iT76aebler25cYpbuJFzy9srT34Oc0MrFcaKp9E/2/qrxgXn+RcAAP//FfI/AuoAAAA",
+            "objectset.rio.cattle.io/id": "fleet-agent-bootstrap"
+        },
+        "creationTimestamp": "2023-03-10T17:27:21Z",
+        "deletionTimestamp": "2023-03-13T02:55:56Z",
+        "finalizers": [
+            "controller.cattle.io/namespace-auth"
+        ],
+        "labels": {
+            "field.cattle.io/projectId": "p-cckqc",
+            "kubernetes.io/metadata.name": "cattle-fleet-system",
+            "objectset.rio.cattle.io/hash": "f399d0b310fbfb28e9667312fdc7a33954e2b8c8"
+        },
+        "name": "cattle-fleet-system",
+        "resourceVersion": "4220647",
+        "uid": "9161e999-4710-46c2-b2c5-8494d449bd78"
+    },
+    "spec": {},
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2023-03-13T02:56:01Z",
+                "message": "All resources successfully discovered",
+                "reason": "ResourcesDiscovered",
+                "status": "False",
+                "type": "NamespaceDeletionDiscoveryFailure"
+            },
+            {
+                "lastTransitionTime": "2023-03-13T02:56:01Z",
+                "message": "All legacy kube types successfully parsed",
+                "reason": "ParsedGroupVersions",
+                "status": "False",
+                "type": "NamespaceDeletionGroupVersionParsingFailure"
+            },
+            {
+                "lastTransitionTime": "2023-03-13T02:56:01Z",
+                "message": "All content successfully deleted, may be waiting on finalization",
+                "reason": "ContentDeleted",
+                "status": "False",
+                "type": "NamespaceDeletionContentFailure"
+            },
+            {
+                "lastTransitionTime": "2023-03-13T02:56:22Z",
+                "message": "All content successfully removed",
+                "reason": "ContentRemoved",
+                "status": "False",
+                "type": "NamespaceContentRemaining"
+            },
+            {
+                "lastTransitionTime": "2023-03-13T02:56:01Z",
+                "message": "All content-preserving finalizers finished",
+                "reason": "ContentHasNoFinalizers",
+                "status": "False",
+                "type": "NamespaceFinalizersRemaining"
+            }
+        ],
+        "phase": "Terminating"
+    }
+}
